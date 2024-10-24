@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>My To-Do List</title>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300..800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"> <!-- Font Awesome -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> <!-- Tambahkan SweetAlert -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Open Sans', Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background-color: #f3f4f6;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .title {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .task-input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        .task-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+
+        .add-button {
+            padding: 0.75rem 1.5rem;
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .add-button:hover {
+            background-color: #2563eb;
+        }
+
+        .add-button:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4);
+        }
+
+        #task-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        #task-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #d1d5db;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+
+        #task-list li:hover {
+            background-color: #e9ecef;
+        }
+
+        .delete-task {
+            background-color: #dc2626;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 0.25rem 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .delete-task:hover {
+            background-color: #b91c1c;
+        }
+
+        .edit-task {
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 0.25rem 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .edit-task:hover {
+            background-color: #2563eb;
+        }
+
+        .mark-complete {
+            background-color: #10b981;  
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 0.25rem 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-left: 0.5rem;
+        }
+
+        .mark-complete:hover {
+            background-color: #059669;
+        }
+
+        .completed {
+            text-decoration: line-through;
+            opacity: 0.7;
+            background-color: #d1fae5; 
+            border-color: #10b981; 
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">My To-Do List</h1>
+        <div class="input-group">
+            <input type="text" id="new-task" class="task-input" placeholder="Add a new task...">
+            <button id="add-task" class="add-button">Add Task</button>
+        </div>
+        <ul id="task-list"></ul>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const addTaskButton = document.getElementById('add-task');
+            const taskList = document.getElementById('task-list');
+            const newTaskInput = document.getElementById('new-task');
+
+            function addTask() {
+                const taskText = newTaskInput.value.trim();
+                if (taskText === '') return;
+
+                const li = document.createElement('li');
+                li.innerHTML = `${taskText} 
+                <div>
+                    <button class="mark-complete">✔</button> <!-- Tombol untuk menandai selesai -->
+                    <button class="edit-task"><i class="fas fa-pencil-alt"></i></button>
+                    <button class="delete-task">X</button>
+                </div>`;
+                taskList.appendChild(li);
+                newTaskInput.value = '';
+            }
+
+            taskList.addEventListener('click', function(e) {
+                if (e.target.classList.contains('delete-task')) {
+                    Swal.fire({
+                        title: 'Are you sure you want to delete this task?',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes, delete it!',
+                        cancelButtonText: 'No, keep it',
+                        icon: 'warning'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            e.target.parentElement.parentElement.remove();
+                            Swal.fire('Deleted!', 'Your task has been deleted.', 'success');
+                        }
+                    });
+                } else if (e.target.closest('.edit-task')) {
+                    const taskItem = e.target.closest('li');
+                    editTask.call(taskItem); 
+                } else if (e.target.classList.contains('mark-complete')) {
+                    const taskItem = e.target.closest('li');
+                    toggleComplete.call(taskItem);
+                }
+            });
+
+            function editTask() {
+                const currentText = this.firstChild.textContent.trim();
+                const newText = prompt('Edit your task:', currentText);
+                if (newText !== null && newText.trim() !== '') {
+                    this.firstChild.textContent = newText;
+                }
+            }
+
+            function toggleComplete() {
+                this.classList.toggle('completed');
+                const taskCompleted = this.classList.contains('completed');
+                const message = taskCompleted ? 'Task marked as completed!' : 'Task marked as incomplete!';
+                Swal.fire('Good job!', message, 'success');
+            }
+
+            addTaskButton.addEventListener('click', addTask);
+
+            newTaskInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    addTask();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
